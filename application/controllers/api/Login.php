@@ -18,56 +18,38 @@ class Login extends REST_Controller {
      *
      * @return Response
     */
-	public function index_get($id = 0)
+	public function index_get($user,$pass )
 	{
-        if(!empty($id)){
-            $data = $this->db->get_where("Product", ['id' => $id])->row_array();
-        }else{
-            $data = $this->db->get("product")->result();
-        }
-     
+        
+        $data = $this->db->get_where("Login", ['User' => $user,'Pass' => $pass])->row_array();
+     if(empty($data)){
+
+        $this->response($data, REST_Controller::HTTP_UNAUTHORIZED);
+    }else{
+        $this->db->update('Login', ['Code' => rand(100000,999999)],['Id' => $data['Id'] ]);
+        $data = $this->db->get_where("Login", ['User' => $user,'Pass' => $pass])->row_array();
         $this->response($data, REST_Controller::HTTP_OK);
+    }
+        
+     
 	}
+
+    public function validate_get($user,$code)
+    {
+        
+
+        $data = $this->db->get_where("Login", ['User' => $user,'Code' => $code])->row_array();
+     if(empty($data)){
+
+        $this->response($data, REST_Controller::HTTP_UNAUTHORIZED);
+    }else{
+        $this->db->update('Login', ['Code' => null],['Id' => $data['Id'] ]);
+        $this->response($data, REST_Controller::HTTP_OK);
+    }
+        
+     
+    }
       
-    /**
-     * Get All Data from this method.
-     *
-     * @return Response
-    */
-    public function index_post()
-    {
-        $input = $this->input->post();
-        $this->db->insert('Product',$input);
-        $id = $this->db->insert_id();
-        $data = $this->db->get_where("Product", ['id' => $id])->row_array();
-     
-        $this->response($data, REST_Controller::HTTP_OK);
-    } 
-     
-    /**
-     * Get All Data from this method.
-     *
-     * @return Response
-    */
-    public function index_put($id)
-    {
-        $input = $this->put();
-        $this->db->update('Product', $input, array('id'=>$id));
-        $data = $this->db->get_where("Product", ['id' => $id])->row_array();
-            
-        $this->response($data, REST_Controller::HTTP_OK);
-    }
-     
-    /**
-     * Get All Data from this method.
-     *
-     * @return Response
-    */
-    public function index_delete($id)
-    {
-        $this->db->delete('Product', array('id'=>$id));
-       $data =['mensaje'=>'eliminado'];
-        $this->response($data, REST_Controller::HTTP_OK);
-    }
-    	
+        
+       	
 }

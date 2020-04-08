@@ -6,6 +6,10 @@ class Category_model extends CI_Model {
 	function getCategoryBycategory_id($category_id){
 		return $this->db->get_where('Category',['category_id'=> $category_id])->row_array();
 	}
+
+	function getAllCategory($category_id){
+		return $this->db->get('Category')->row_array();
+	}
 	
 
 }
