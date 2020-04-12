@@ -33,43 +33,16 @@ class Category extends REST_Controller {
 
     public function all_get()
     {
-        $data = [];
-        $exit = '';
-        $count =0;
-
-        $categories = $this->db->get_where('Category',['category_id'=> null])->result();
+        $data = $this->db->query("
+                    SELECT category.*,( SELECT count(*) 
+                                        from PRODUCT 
+                                        where Category_Id =category.Id 
+                                    ) as numProduc
+                    FROM category
+                    order by code  asc")->result();
         
-        foreach ($categories as $key => $value) {
-            
-            $data[$count] = $key);
-            //echo $value->category_id;
-            $id = $value->Id;
-
-            while($id != "" ){
-                $id 
-
-                $children = $this->CategoryChildren($id);
-                foreach ($children as $k => $v) {
-                    ///echo $v->Name;
-                    //$data[$value->Id][$v->Id] =array($v->Name);
-                    $id = $v->category_id;
-                }
-                //echo $value->Name;
-                //echo $value->category_id;
-            }
-            $count ++;
-        }
-        echo '<br>----------------------------<br>';     
-        echo "<pre>"; print_r ($data);echo "</pre>";
-     return 0;
         $this->response($data, REST_Controller::HTTP_OK);
     }
-
-    public function CategoryChildren($categoryId){
-        return  $this->db->get_where('Category', ["category_id"=>$categoryId])->result();
-    }
-
-
 
       
     /**

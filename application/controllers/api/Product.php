@@ -27,7 +27,9 @@ class Product extends REST_Controller {
         }else{
             $data = $this->db->get("product")->result();
         }
-     
+
+        $data['PriceUsd'] =$data['Price'] * $this->trm_get();
+
         $this->response($data, REST_Controller::HTTP_OK);
     }
 
@@ -41,6 +43,25 @@ class Product extends REST_Controller {
     */
         $data = $this->pm->LatestProducts($limit);
         $this->response($data, REST_Controller::HTTP_OK);
+    }
+
+    public function byCategory_get($id){
+    /**
+    ********************************************************
+    * GET   All product in categori Id
+    ********************************************************
+    * @param   {from-data}      {list input to create}
+    * @return  {array}          {NewProduct/Error}
+    */
+        $data = $this->pm->byCategory_get($id);
+        
+        return $this->response($data, REST_Controller::HTTP_OK);
+    }
+
+    function trm_get(){
+       $res = (object)json_decode( file_get_contents("http://apilayer.net/api/live?access_key=6a12eb1b29a43864e31e3532116a61bd&currencies=COP&source=USD&format=1"), true);
+        
+       return $res->quotes['USDCOP'];
     }
       
 

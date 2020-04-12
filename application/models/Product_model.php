@@ -31,6 +31,23 @@ class Product_model extends CI_Model {
     return  $this->db->get('Product', $limit)->result();
 	}
 
+	function byCategory_get($id){
+		/**
+		********************************************************
+		* Select 10 latest products
+		********************************************************
+		* @return   {array}		{10 latest products}
+		*/
+
+    return  $this->db->get_where('Product', ['Category_Id' => $id])->result();
+	}
+
+
+	
+
+
+	
+
 	
 
 }
