@@ -14,7 +14,7 @@ class Product extends REST_Controller {
     }
        
     
-    public function index_get($id = 0){
+    public function index_get($id = ""){
     /**
     ********************************************************
     * GET   All/By Id
@@ -22,13 +22,16 @@ class Product extends REST_Controller {
     * @param   {from-data}      {list input to create}
     * @return  {array}          {NewProduct/Error}
     */
+        $trm = $this->trm_get();
         if(!empty($id)){
             $data = $this->db->get_where("Product", ['id' => $id])->row_array();
+            $data['PriceUsd'] =$data['Price'] * $trm;
         }else{
             $data = $this->db->get("product")->result();
+            foreach ($data as $row ) {
+                $row->PriceUsd = $row->Price * $trm;
+            }
         }
-
-        $data['PriceUsd'] =$data['Price'] * $this->trm_get();
 
         $this->response($data, REST_Controller::HTTP_OK);
     }
@@ -59,9 +62,13 @@ class Product extends REST_Controller {
     }
 
     function trm_get(){
-       $res = (object)json_decode( file_get_contents("http://apilayer.net/api/live?access_key=6a12eb1b29a43864e31e3532116a61bd&currencies=COP&source=USD&format=1"), true);
-        
-       return $res->quotes['USDCOP'];
+       $res = (object)json_decode( file_get_contents("http://apilayer.net/api/live?access_key=764c466b080e6137dd9b216e3dbe4189&currencies=COP&source=USD&format=1"), true);
+
+               if(isset($res->quotes['USDCOP'])){
+                    return $res->quotes['USDCOP'];
+               }else{
+                return 0;
+               }
     }
       
 
@@ -76,20 +83,25 @@ class Product extends REST_Controller {
     */
         $error =[];
         $input =(object) $this->input->post();
-
+        
         if(!array_key_exists('Name', $input)){
              $error['Name'] = 'Requerido' ;
         }
 
-        if(array_key_exists('Category_id', $input)){
+        if(array_key_exists('category_id', $input)){
 
-             $result = $this->cm->getCategoryBycategory_id($input->Category_id);
+             $isChildren = $this->cm->getCategoryByfather_id($input->category_id);
 
-             if(count($result) >0){
-                $error['Category_id'] = 'No es un categoria hija.';
+             if(!empty($result) && count($result) >0){
+                $error['category_id'] = 'No es un categoria hija.';
+             }else{
+                $exist = $this->cm->getCategoryById($input->category_id);
+                if(empty($exist)){
+                    $error['category_id'] = 'No existe.';
+                }
              }
         }else{
-            $error['Category_id']="Requerido" ;
+            $error['category_id']="Requerido" ;
         } 
 
         if(count($error) == 0){

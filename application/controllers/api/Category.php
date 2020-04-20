@@ -10,7 +10,8 @@ class Category extends REST_Controller {
      * @return Response
     */
     public function __construct() {
-       parent::__construct();
+        parent::__construct();
+        $this->load->model('Category_model','cm');
     }
        
     /**
@@ -44,6 +45,25 @@ class Category extends REST_Controller {
         $this->response($data, REST_Controller::HTTP_OK);
     }
 
+
+    public function childrens_get()
+    {
+        $data = $this->db->query("  SELECT category.*
+                                    FROM category
+                                    left join category as father on category.Id = father.father_id
+                                    where father.father_id is NULL")->result();
+        
+        
+        $this->response($data, REST_Controller::HTTP_OK);
+    }
+
+    public function categoryfather_get()
+    {
+        $data = $this->cm->getCategoryfather();
+        
+        
+        $this->response($data, REST_Controller::HTTP_OK);
+    }
       
     /**
      * Get All Data from this method.
